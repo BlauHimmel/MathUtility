@@ -10,7 +10,9 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <iomanip>
+#include <array>
 #include <stdio.h>
 
 template<class T>
@@ -63,17 +65,35 @@ public:
 		this->x = x; this->y = y;
 	}
 
+	vec2(std::array<T, 2> arr)
+	{
+		static_assert(std::is_floating_point<T>::value, "Type T of vec2 must be a floating-point type!");
+		x = arr[0]; y = arr[1];
+	}
+
 public:
 	T& operator[](size_t index)
 	{
-		if (index >= 2) { throw std::out_of_range("vec2 index out of range!"); }
+		if (index >= 2 || index < 0) { throw std::out_of_range("vec2 index out of range!"); }
 		return *(&x + index);
 	}
 
 public:
+	std::unique_ptr<T[]> copy() const
+	{
+		std::unique_ptr<T[]> ptr = std::make_unique<T[]>(2);
+		ptr[0] = x; ptr[1] = y;
+		return ptr;
+	}
+
 	T* ptr()
 	{
 		return &x;
+	}
+
+	std::array<T, 2> to_array() const
+	{
+		return { x, y };
 	}
 
 	T length() const
@@ -151,17 +171,35 @@ public:
 		this->x = x; this->y = y; this->z = z;
 	}
 
+	vec3(std::array<T, 3> arr)
+	{
+		static_assert(std::is_floating_point<T>::value, "Type T of vec3 must be a floating-point type!");
+		x = arr[0]; y = arr[1]; z = arr[2];
+	}
+
 public:
 	T& operator[](size_t index)
 	{
-		if (index >= 3) { throw std::out_of_range("vec3 index out of range!"); }
+		if (index >= 3 || index < 0) { throw std::out_of_range("vec3 index out of range!"); }
 		return *(&x + index);
 	}
 
 public:
+	std::unique_ptr<T[]> copy() const
+	{
+		std::unique_ptr<T[]> ptr = std::make_unique<T[]>(3);
+		ptr[0] = x; ptr[1] = y; ptr[2] = z;
+		return ptr;
+	}
+
 	T* ptr()
 	{
 		return &x;
+	}
+
+	std::array<T, 3> to_array() const
+	{
+		return { x, y, z };
 	}
 
 	T length() const
@@ -245,17 +283,35 @@ public:
 		this->x = x; this->y = y; this->z = z; this->w = w;
 	}
 
+	vec4(std::array<T, 4> arr)
+	{
+		static_assert(std::is_floating_point<T>::value, "Type T of vec3 must be a floating-point type!");
+		x = arr[0]; y = arr[1]; z = arr[2]; w = arr[3];
+	}
+
 public:
 	T& operator[](size_t index)
 	{
-		if (index >= 4) { throw std::out_of_range("vec4 index out of range!"); }
+		if (index >= 4 || index < 0) { throw std::out_of_range("vec4 index out of range!"); }
 		return *(&x + index);
 	}
 
 public:
+	std::unique_ptr<T[]> copy() const
+	{
+		std::unique_ptr<T[]> ptr = std::make_unique<T[]>(4);
+		ptr[0] = x; ptr[1] = y; ptr[2] = z; ptr[3] = w;
+		return ptr;
+	}
+
 	T* ptr()
 	{
 		return &x;
+	}
+
+	std::array<T, 4> to_array() const
+	{
+		return { x, y, z, w };
 	}
 
 	T length() const
@@ -342,6 +398,42 @@ template<class T>
 inline T length(vec4<T> vec)
 {
 	return vec.length();
+}
+
+template<class T>
+inline std::array<T, 2> to_array(vec2<T> vec)
+{
+	return vec.to_array();
+}
+
+template<class T>
+inline std::array<T, 3> to_array(vec3<T> vec)
+{
+	return vec.to_array();
+}
+
+template<class T>
+inline std::array<T, 4> to_array(vec4<T> vec)
+{
+	return vec.to_array();
+}
+
+template<class T>
+inline vec2<T> from_array(std::array<T, 2> arr)
+{
+	return vec2<T>(arr[0], arr[1]);
+}
+
+template<class T>
+inline vec3<T> from_array(std::array<T, 3> arr)
+{
+	return vec3<T>(arr[0], arr[1], arr[2]);
+}
+
+template<class T>
+inline vec4<T> from_array(std::array<T, 4> arr)
+{
+	return vec4<T>(arr[0], arr[1], arr[2], arr[3]);
 }
 
 template<class T>
