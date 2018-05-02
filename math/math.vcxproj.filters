@@ -26,5 +26,8 @@
     <ClInclude Include="matrix.hpp">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="angle.hpp">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

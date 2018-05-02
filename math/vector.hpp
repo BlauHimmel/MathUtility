@@ -13,6 +13,7 @@
 #include <memory>
 #include <iomanip>
 #include <array>
+#include <tuple>
 #include <stdio.h>
 
 template<class T>
@@ -36,7 +37,7 @@ using vec4f = vec4<float>;
 using vec4d = vec4<double>;
 using vec4ld = vec4<long double>;
 
-#define FLOATING_POINT_EQUAL_THRESHOLD 0.000001
+#define FLOATING_POINT_THRESHOLD 0.000001
 
 template<class T>
 class vec2
@@ -73,6 +74,12 @@ public:
 
 public:
 	T& operator[](size_t index)
+	{
+		if (index >= 2 || index < 0) { throw std::out_of_range("vec2 index out of range!"); }
+		return *(&x + index);
+	}
+
+	T operator[](size_t index) const
 	{
 		if (index >= 2 || index < 0) { throw std::out_of_range("vec2 index out of range!"); }
 		return *(&x + index);
@@ -184,6 +191,12 @@ public:
 		return *(&x + index);
 	}
 
+	T operator[](size_t index) const
+	{
+		if (index >= 3 || index < 0) { throw std::out_of_range("vec3 index out of range!"); }
+		return *(&x + index);
+	}
+
 public:
 	std::unique_ptr<T[]> copy() const
 	{
@@ -285,12 +298,18 @@ public:
 
 	vec4(std::array<T, 4> arr)
 	{
-		static_assert(std::is_floating_point<T>::value, "Type T of vec3 must be a floating-point type!");
+		static_assert(std::is_floating_point<T>::value, "Type T of vec4 must be a floating-point type!");
 		x = arr[0]; y = arr[1]; z = arr[2]; w = arr[3];
 	}
 
 public:
 	T& operator[](size_t index)
+	{
+		if (index >= 4 || index < 0) { throw std::out_of_range("vec4 index out of range!"); }
+		return *(&x + index);
+	}
+
+	T operator[](size_t index) const
 	{
 		if (index >= 4 || index < 0) { throw std::out_of_range("vec4 index out of range!"); }
 		return *(&x + index);
@@ -383,21 +402,39 @@ template<class T>
 vec4<T> vec4<T>::one = vec4<T>(1.0, 1.0, 1.0, 1.0);
 
 template<class T>
-inline T length(vec2<T> vec)
+std::unique_ptr<T[]> copy(vec2<T> vec)
 {
-	return vec.length();
+	return vec.copy();
 }
 
 template<class T>
-inline T length(vec3<T> vec)
+std::unique_ptr<T[]> copy(vec3<T> vec)
 {
-	return vec.length();
+	return vec.copy();
 }
 
 template<class T>
-inline T length(vec4<T> vec)
+std::unique_ptr<T[]> copy(vec4<T> vec)
 {
-	return vec.length();
+	return vec.copy();
+}
+
+template<class T>
+T* ptr(vec2<T> vec)
+{
+	return vec.ptr();
+}
+
+template<class T>
+T* ptr(vec3<T> vec)
+{
+	return vec.ptr();
+}
+
+template<class T>
+T* ptr(vec4<T> vec)
+{
+	return vec.ptr();
 }
 
 template<class T>
@@ -437,6 +474,24 @@ inline vec4<T> from_array(std::array<T, 4> arr)
 }
 
 template<class T>
+inline T length(vec2<T> vec)
+{
+	return vec.length();
+}
+
+template<class T>
+inline T length(vec3<T> vec)
+{
+	return vec.length();
+}
+
+template<class T>
+inline T length(vec4<T> vec)
+{
+	return vec.length();
+}
+
+template<class T>
 inline T sqr_length(vec2<T> vec)
 {
 	return vec.sqr_length();
@@ -455,21 +510,39 @@ inline T sqr_length(vec4<T> vec)
 }
 
 template<class T>
-inline T normalize(vec2<T> vec)
+inline vec2<T> normal(vec2<T> vec)
 {
-	return vec.normalize();
+	return vec.normal();
 }
 
 template<class T>
-inline T normalize(vec3<T> vec)
+inline vec3<T> normal(vec3<T> vec)
 {
-	return vec.normalize();
+	return vec.normal();
 }
 
 template<class T>
-inline T normalize(vec4<T> vec)
+inline vec4<T> normal(vec4<T> vec)
 {
-	return vec.normalize();
+	return vec.normal();
+}
+
+template<class T>
+inline void normalize(vec2<T> vec)
+{
+	vec.normalize();
+}
+
+template<class T>
+inline void normalize(vec3<T> vec)
+{
+	vec.normalize();
+}
+
+template<class T>
+inline void normalize(vec4<T> vec)
+{
+	vec.normalize();
 }
 
 template<class T>
@@ -509,7 +582,7 @@ inline T dot(vec4<T> vec1, vec4<T> vec2)
 }
 
 template<class T>
-inline T cross(vec3<T> vec1, vec3<T> vec2)
+inline vec3<T> cross(vec3<T> vec1, vec3<T> vec2)
 {
 	return vec1.cross(vec2);
 }
@@ -641,37 +714,19 @@ inline void operator+=(vec4<T>& vec1, vec4<T> vec2)
 }
 
 template<class T>
-inline vec3<T> operator+=(vec2<T>& vec, T t)
+inline void operator+=(vec2<T>& vec, T t)
 {
 	vec.x += t; vec.y += t;
 }
 
 template<class T>
-inline vec3<T> operator+=(vec3<T>& vec, T t)
+inline void operator+=(vec3<T>& vec, T t)
 {
 	vec.x += t; vec.y += t; vec.z += t;
 }
 
 template<class T>
-inline vec4<T> operator+=(vec4<T>& vec, T t)
-{
-	vec.x += t; vec.y += t; vec.z += t; vec.w += t;
-}
-
-template<class T>
-inline vec3<T> operator+=(T t, vec2<T>& vec)
-{
-	vec.x += t; vec.y += t;
-}
-
-template<class T>
-inline vec3<T> operator+=(T t, vec3<T>& vec)
-{
-	vec.x += t; vec.y += t; vec.z += t;
-}
-
-template<class T>
-inline vec4<T> operator+=(T t, vec4<T>& vec)
+inline void operator+=(vec4<T>& vec, T t)
 {
 	vec.x += t; vec.y += t; vec.z += t; vec.w += t;
 }
@@ -749,37 +804,19 @@ inline void operator-=(vec4<T>& vec1, vec4<T> vec2)
 }
 
 template<class T>
-inline vec3<T> operator-=(vec2<T>& vec, T t)
+inline void operator-=(vec2<T>& vec, T t)
 {
 	vec.x -= t; vec.y -= t;
 }
 
 template<class T>
-inline vec3<T> operator-=(vec3<T>& vec, T t)
+inline void operator-=(vec3<T>& vec, T t)
 {
 	vec.x -= t; vec.y -= t; vec.z -= t;
 }
 
 template<class T>
-inline vec4<T> operator-=(vec4<T>& vec, T t)
-{
-	vec.x -= t; vec.y -= t; vec.z -= t; vec.w -= t;
-}
-
-template<class T>
-inline vec3<T> operator-=(T t, vec2<T>& vec)
-{
-	vec.x -= t; vec.y -= t;
-}
-
-template<class T>
-inline vec3<T> operator-=(T t, vec3<T>& vec)
-{
-	vec.x -= t; vec.y -= t; vec.z -= t;
-}
-
-template<class T>
-inline vec4<T> operator-=(T t, vec4<T>& vec)
+inline void operator-=(vec4<T>& vec, T t)
 {
 	vec.x -= t; vec.y -= t; vec.z -= t; vec.w -= t;
 }
@@ -857,37 +894,19 @@ inline void operator*=(vec4<T>& vec1, vec4<T> vec2)
 }
 
 template<class T>
-inline vec3<T> operator*=(vec2<T>& vec, T t)
+inline void operator*=(vec2<T>& vec, T t)
 {
 	vec.x *= t; vec.y *= t;
 }
 
 template<class T>
-inline vec3<T> operator*=(vec3<T>& vec, T t)
+inline void operator*=(vec3<T>& vec, T t)
 {
 	vec.x *= t; vec.y *= t; vec.z *= t;
 }
 
 template<class T>
-inline vec4<T> operator*=(vec4<T>& vec, T t)
-{
-	vec.x *= t; vec.y *= t; vec.z *= t; vec.w *= t;
-}
-
-template<class T>
-inline vec3<T> operator*=(T t, vec2<T>& vec)
-{
-	vec.x *= t; vec.y *= t;
-}
-
-template<class T>
-inline vec3<T> operator*=(T t, vec3<T>& vec)
-{
-	vec.x *= t; vec.y *= t; vec.z *= t;
-}
-
-template<class T>
-inline vec4<T> operator*=(T t, vec4<T>& vec)
+inline void operator*=(vec4<T>& vec, T t)
 {
 	vec.x *= t; vec.y *= t; vec.z *= t; vec.w *= t;
 }
@@ -965,37 +984,19 @@ inline void operator/=(vec4<T>& vec1, vec4<T> vec2)
 }
 
 template<class T>
-inline vec3<T> operator/=(vec2<T>& vec, T t)
+inline void operator/=(vec2<T>& vec, T t)
 {
 	vec.x /= t; vec.y /= t;
 }
 
 template<class T>
-inline vec3<T> operator/=(vec3<T>& vec, T t)
+inline void operator/=(vec3<T>& vec, T t)
 {
 	vec.x /= t; vec.y /= t; vec.z /= t;
 }
 
 template<class T>
-inline vec4<T> operator/=(vec4<T>& vec, T t)
-{
-	vec.x /= t; vec.y /= t; vec.z /= t; vec.w /= t;
-}
-
-template<class T>
-inline vec3<T> operator/=(T t, vec2<T>& vec)
-{
-	vec.x /= t; vec.y /= t;
-}
-
-template<class T>
-inline vec3<T> operator/=(T t, vec3<T>& vec)
-{
-	vec.x /= t; vec.y /= t; vec.z /= t;
-}
-
-template<class T>
-inline vec4<T> operator/=(T t, vec4<T>& vec)
+inline void operator/=(vec4<T>& vec, T t)
 {
 	vec.x /= t; vec.y /= t; vec.z /= t; vec.w /= t;
 }
@@ -1075,6 +1076,7 @@ inline vec4<T> abs(vec4<T> vec)
 template<class T>
 inline T lerp(T a, T b, T t)
 {
+	static_assert(std::is_floating_point<T>::value, "Type T of the function must be a floating-point type!");
 	return a + t * (b - a);
 }
 
@@ -1123,6 +1125,7 @@ inline vec4<T> clamp(vec4<T> vec, T min, T max)
 template<class T>
 inline T floor(T t)
 {
+	static_assert(std::is_floating_point<T>::value, "Type T of the function must be a floating-point type!");
 	return std::floor(t);
 }
 
@@ -1147,6 +1150,7 @@ inline vec4<T> floor(vec4<T> vec)
 template<class T>
 inline T ceil(T t)
 {
+	static_assert(std::is_floating_point<T>::value, "Type T of the function must be a floating-point type!");
 	return std::ceil(t);
 }
 
@@ -1171,6 +1175,7 @@ inline vec4<T> ceil(vec4<T> vec)
 template<class T>
 inline T frac(T t)
 {
+	static_assert(std::is_floating_point<T>::value, "Type T of the function must be a floating-point type!");
 	return t - floor(t);;
 }
 
@@ -1195,6 +1200,7 @@ inline vec4<T> frac(vec4<T> vec)
 template<class T>
 inline T mod(T t1, T t2)
 {
+	static_assert(std::is_floating_point<T>::value, "Type T of the function must be a floating-point type!");
 	return std::fmod(t1, t2);
 }
 
@@ -1225,6 +1231,7 @@ inline vec4<T> mod(vec4<T> vec1, vec4<T> vec2)
 template<class T>
 inline T smooth_interpolation(T a, T b, T t)
 {
+	static_assert(std::is_floating_point<T>::value, "Type T of the function must be a floating-point type!");
 	t = clamp((t - a) / (b - a), 0.0, 1.0);
 	return t * t * (3.0 - 2.0 * t);
 }
@@ -1266,9 +1273,9 @@ inline vec4<T> smooth_interpolation(vec4<T> vec1, vec4<T> vec2, T t)
 }
 
 template<class T>
-inline bool equal(T t1, T t2, T threshold = FLOATING_POINT_EQUAL_THRESHOLD)
+inline bool equal(T t1, T t2, T threshold = FLOATING_POINT_THRESHOLD)
 {
-	static_assert(std::is_floating_point<T>::value, "Type T of function equal(T t1, T t2, T threshold = 0.0001) must be a floating-point type!");
+	static_assert(std::is_floating_point<T>::value, "Type T of the function must be a floating-point type!");
 	return abs(t1 - t2) <= threshold;
 }
 
@@ -1366,7 +1373,7 @@ template<class T>
 inline std::ostream& operator<<(std::ostream& out, vec2<T>& vec)
 {
 	out.setf(std::ios::fixed);
-	out << std::ios::fixed << std::setprecision(2) << "vec4(" << vec.x << ", " << vec.y << ")";
+	out << std::ios::fixed << std::setprecision(2) << "vec2(" << vec.x << ", " << vec.y << ")";
 	return out;
 }
 
@@ -1381,7 +1388,7 @@ template<class T>
 inline std::ostream& operator<<(std::ostream& out, vec3<T>& vec)
 {
 	out.setf(std::ios::fixed);
-	out << std::ios::fixed << std::setprecision(2) << "vec4(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+	out << std::ios::fixed << std::setprecision(2) << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
 	return out;
 }
 
@@ -1405,6 +1412,19 @@ inline std::istream& operator>>(std::istream& in, vec4<T>& vec)
 {
 	in >> vec.x >> vec.y >> vec.z >> vec.w;
 	return in;
+}
+
+template<class T>
+vec4<T> homogeneous(vec3<T> vec, bool is_point/*or direction?*/)
+{
+	if (is_point)
+	{
+		return vec4<T>(vec.x, vec.y, vec.z, 1.0);
+	}
+	else
+	{
+		return vec4<T>(vec.x, vec.y, vec.z, 0.0);
+	}
 }
 
 #endif // !__VECTOR__
