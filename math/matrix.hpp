@@ -993,7 +993,7 @@ inline mat4x4<T> translate(vec3<T> vec, bool is_row_vector = true)
 }
 
 template<class T>
-inline mat4x4<T> scale(T x, T y, T z, bool is_row_vector = true)
+inline mat4x4<T> scale(T x, T y, T z)
 {
 	mat4x4<T> mat = mat4x4<T>::identity;
 	mat(0, 0) = x; mat(1, 1) = y; mat(2, 2) = z;
